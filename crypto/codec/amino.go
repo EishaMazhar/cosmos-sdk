@@ -1,9 +1,9 @@
 package codec
 
 import (
-	"github.com/cometbft/cometbft/crypto/sr25519"
-
 	"cosmossdk.io/core/legacy"
+	"github.com/cometbft/cometbft/crypto/sr25519"
+	"github.com/cosmos/cosmos-sdk/crypto/dilithium"
 
 	bls12_381 "github.com/cosmos/cosmos-sdk/crypto/keys/bls12_381"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
@@ -34,4 +34,6 @@ func RegisterCrypto(cdc legacy.Amino) {
 	cdc.RegisterConcrete(&secp256k1.PrivKey{},
 		secp256k1.PrivKeyName)
 	cdc.RegisterConcrete(&bls12_381.PrivKey{}, bls12_381.PrivKeyName)
+	cdc.RegisterConcrete(&dilithium.DilithiumKey{}, "cosmos-sdk/DilithiumKey")
+
 }

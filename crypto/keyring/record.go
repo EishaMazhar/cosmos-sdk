@@ -8,6 +8,8 @@ import (
 	errorsmod "cosmossdk.io/errors"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+
+	"github.com/cosmos/cosmos-sdk/crypto/dilithium"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/types"
@@ -136,6 +138,38 @@ func extractPrivKeyFromLocal(rl *Record_Local) (cryptotypes.PrivKey, error) {
 	priv, ok := rl.PrivKey.GetCachedValue().(cryptotypes.PrivKey)
 	if !ok {
 		return nil, errorsmod.Wrap(ErrCastAny, "PrivKey")
+	}
+
+	return priv, nil
+}
+
+// Assuming there's a method to get a key by name that returns the concrete key type.
+func CreateDilithiumKey(k Keyring, name string) (*dilithium.DilithiumKey, error) {
+	return dilithium.GenerateKey()
+}
+
+// SignWithDilithiumKey signs a message using the Dilithium key associated with the given name
+func NewDilithiumRecord(name string, priv *dilithium.DilithiumKey, pk cryptotypes.PubKey) (*Record, error) {
+	any, err := codectypes.NewAnyWithValue(priv)
+	if err != nil {
+		return nil, err
+	}
+
+	recordDilithium := &Record_Local{PrivKey: any} // Reusing the Record_Local struct
+	recordDilithiumItem := &Record_Local_{recordDilithium}
+
+	return newRecord(name, pk, recordDilithiumItem)
+}
+
+func extractDilithiumKeyFromRecord(k *Record) (*dilithium.DilithiumKey, error) {
+	rl := k.GetLocal() // Adjust this if you differentiate Dilithium keys
+	if rl == nil {
+		return nil, ErrPrivKeyExtr
+	}
+
+	priv, ok := rl.PrivKey.GetCachedValue().(*dilithium.DilithiumKey)
+	if !ok {
+		return nil, errorsmod.Wrap(ErrCastAny, "DilithiumKey")
 	}
 
 	return priv, nil
